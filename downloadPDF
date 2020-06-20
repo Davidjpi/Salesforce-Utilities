@@ -1,0 +1,26 @@
+public class download {
+    @AuraEnabled
+    public static String downloadPDF (String numInvoice, String dateInvoice){
+        // Instantiate a new http object
+        Http h = new Http();
+        // Instantiate a new HTTP request, specify the method (GET) as well as the endpoint
+        HttpRequest req = new HttpRequest();
+        
+        req.setEndpoint('callout:invoice/invoice/getInvoice?vendorVat=A80903180&vendorCountry=ESP&numInvoice=' + numInvoice + '&dateInvoice=' + dateInvoice);
+		req.setHeader('apikey', '{!$Credential.Password}');        
+		req.setTimeout(60000);//sets maximum timeout
+        req.setMethod('GET');
+        // Send the request, and return a response
+        HttpResponse res = h.send(req);
+        
+        String bodyStr = res.getBody();
+	
+		Invoice bodyJSON = (Invoice)JSON.deserialize(bodyStr, Invoice.class);
+		
+        String fileURL = bodyJSON.dataInvoicePDF.bytesPDF;
+        
+        System.debug(fileURL);
+        
+        return fileURL;
+    }
+}
